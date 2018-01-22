@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#=========================================================================
+# ========================================================================
 #
 # Copyright (c) 2017 <> All Rights Reserved
 #
@@ -9,7 +9,7 @@
 # Author: Hai Liang Wang
 # Date: 2017-09-27
 #
-#=========================================================================
+# ========================================================================
 
 """
 Chinese Synonyms for Natural Language Processing and Understanding.
@@ -17,38 +17,36 @@ Chinese Synonyms for Natural Language Processing and Understanding.
 from __future__ import print_function
 from __future__ import division
 
+import gzip
+import json
+import os
+import sys
+
+import numpy as np
+
+import jieba
+import jieba.posseg as _tokenizer
+from utils import any2unicode
+from word2vec import KeyedVectors
+
 __copyright__ = "Copyright (c) 2017 . All Rights Reserved"
 __author__ = "Hu Ying Xi<>, Hai Liang Wang<hailiang.hl.wang@gmail.com>"
 __date__ = "2017-09-27"
 
-
-import os
-import sys
-import numpy as np
-curdir = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(curdir)
-
-PLT = 2
-
-if sys.version_info[0] < 3:
+try:
     default_stdout = sys.stdout
     default_stderr = sys.stderr
-    reload(sys)
+    reload(sys)  # Python 2
     sys.stdout = default_stdout
     sys.stderr = default_stderr
     sys.setdefaultencoding("utf-8")
-    # raise "Must be using Python 3"
-else:
-    PLT = 3
+except NameError:  # reload() was removed in Python 3
+    pass
 
-import json
-import gzip
-import shutil
-from word2vec import KeyedVectors
-from utils import any2utf8
-from utils import any2unicode
-import jieba.posseg as _tokenizer
-import jieba
+curdir = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(curdir)
+
+PYTHON_VERSION_MAJOR = sys.version_info.major
 
 '''
 globals
@@ -58,30 +56,30 @@ _size = 0
 _vectors = None
 _stopwords = set()
 
-
 '''
 nearby
 '''
+
+
 def _load_vocab(file_path):
     '''
     load vocab dict
     '''
     global _vocab
-    if PLT == 2:
+    if PYTHON_VERSION_MAJOR < 3:
         import io
-        fin = io.TextIOWrapper(
-            io.BufferedReader(
-                gzip.open(file_path)),
-            encoding='utf8',
-            errors='ignore')
+        fin = io.TextIOWrapper(io.BufferedReader(gzip.open(file_path)),
+                               encoding='utf8', errors='ignore')
     else:
-        fin = gzip.open(file_path, 'rt', encoding='utf-8', errors="ignore")
+        fin = gzip.open(file_path, 'rt', encoding='utf-8', errors='ignore')
 
     _vocab = json.loads(fin.read())
+
 
 # build on load
 print(">> Synonyms on loading vocab ...")
 _load_vocab(os.path.join(curdir, "data", "words.nearby.json.gz"))
+
 
 def nearby(word):
     '''
@@ -89,7 +87,7 @@ def nearby(word):
     '''
     try:
         return _vocab[any2unicode(word)]
-    except KeyError as e:
+    except KeyError:
         return [[], []]
 
 
@@ -99,6 +97,8 @@ similarity
 
 # stopwords
 _fin_stopwords_path = os.path.join(curdir, 'data', 'stopwords.txt')
+
+
 def _load_stopwords(file_path):
     '''
     load stop words
@@ -112,8 +112,10 @@ def _load_stopwords(file_path):
     for w in stopwords:
         _stopwords.add(any2unicode(w).strip())
 
+
 print(">> Synonyms on loading stopwords ...")
 _load_stopwords(_fin_stopwords_path)
+
 
 def _segment_words(sen):
     '''
@@ -126,8 +128,11 @@ def _segment_words(sen):
         tags.append(x.flag)
     return words, tags
 
+
 # vectors
 _f_model = os.path.join(curdir, 'data', 'words.vector')
+
+
 def _load_w2v(model_file=_f_model, binary=True):
     '''
     load word2vec model
@@ -137,10 +142,15 @@ def _load_w2v(model_file=_f_model, binary=True):
         raise Exception("Model file does not exist.")
     return KeyedVectors.load_word2vec_format(
         model_file, binary=binary, unicode_errors='ignore')
+
+
 print(">> Synonyms on loading vectors ...")
 _vectors = _load_w2v(model_file=_f_model)
 
-_sim_molecule = lambda x: np.sum(x, axis=0)  # 分子
+
+def _sim_molecule(x):
+    return np.sum(x, axis=0)  # 分子
+
 
 def _get_wv(sentence):
     '''
@@ -162,7 +172,8 @@ def _get_wv(sentence):
                 print("not exist in w2v model: %s" % y_)
                 c.append(np.zeros((100,), dtype=float))
             for n in syns:
-                if n is None: continue
+                if n is None:
+                    continue
                 try:
                     v = _vectors.word_vec(any2unicode(n))
                 except KeyError as error:
@@ -184,6 +195,7 @@ def _unigram_overlap(sentence1, sentence2):
     union = x | y
 
     return ((float)(len(intersection)) / (float)(len(union)))
+
 
 def _levenshtein_distance(sentence1, sentence2):
     '''

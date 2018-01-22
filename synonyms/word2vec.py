@@ -7,32 +7,32 @@
 # Author: Hai Liang Wang
 # Date: 2017-10-16:14:13:24
 #
-#=========================================================================
+# ========================================================================
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
+import os
+import sys
+import unittest
+
+from numpy import float32 as REAL
+from numpy import ascontiguousarray, dtype, fromstring, zeros
+
+import utils
 
 __copyright__ = "Copyright (c) 2017 . All Rights Reserved"
 __author__ = "Hai Liang Wang"
 __date__ = "2017-10-16:14:13:24"
 
-import os
-import sys
 curdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(curdir)
 
-if sys.version_info[0] < 3:
-    reload(sys)
+try:
+    reload(sys)     # Python 2
     sys.setdefaultencoding("utf-8")
-    # raise "Must be using Python 3"
-else:
-    xrange = range
+except NameError:   # reload() was removed in Python 3
+    xrange = range  # Python 3
 
-import utils
-from numpy import dot, zeros, dtype, float32 as REAL,\
-    double, array, vstack, fromstring, sqrt, newaxis,\
-    ndarray, sum as np_sum, prod, ascontiguousarray,\
-    argmax
 
 class Vocab(object):
     """
@@ -222,8 +222,6 @@ class KeyedVectors():
         else:
             raise KeyError("word '%s' not in vocabulary" % word)
 
-
-import unittest
 
 # run testcase: python /Users/hain/tmp/ss Test.testExample
 

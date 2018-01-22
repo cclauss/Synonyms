@@ -6,52 +6,33 @@
 # Licensed under the GNU LGPL v3.0 - http://www.gnu.org/licenses/lgpl.html
 # Author: Hai Liang Wang
 # Date: 2017-10-16:14:13:24
-#
-#=========================================================================
+# =========================================================================
 
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
+import numbers
+import os
+import re
+import shutil
+import sys
+import unicodedata
+from contextlib import contextmanager
+
+import numpy as np
+from six import string_types, u
 
 __copyright__ = "Copyright (c) 2017 . All Rights Reserved"
 __author__ = "Hai Liang Wang"
 __date__ = "2017-10-16:14:13:24"
 
-import os
-import sys
 curdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(curdir)
 
-import re
-import unicodedata
-import os
-import random
-import shutil
-import sys
-import subprocess
-from contextlib import contextmanager
-import numpy as np
-import numbers
-from six import string_types, u
-
-if sys.version_info[0] < 3:
-    reload(sys)
+try:
+    reload(sys)     # Python 2
     sys.setdefaultencoding("utf-8")
-    # raise "Must be using Python 3"
-else:
+except NameError:   # reload() was removed in Python 3
     unicode = str
-
-import collections
-import warnings
-
-try:
-    from html.entities import name2codepoint as n2cp
-except ImportError:
-    from htmlentitydefs import name2codepoint as n2cp
-try:
-    import cPickle as _pickle
-except ImportError:
-    import pickle as _pickle
-
 
 try:
     from smart_open import smart_open

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#=========================================================================
+# ========================================================================
 #
 # Copyright (c) 2017 <> All Rights Reserved
 #
@@ -9,32 +9,32 @@
 # Author: Hai Liang Wang
 # Date: 2017-10-21:11:26:53
 #
-#=========================================================================
+# ========================================================================
 
 """
 
 """
-from __future__ import print_function
-from __future__ import division
+from __future__ import division, print_function
+
+import multiprocessing
+import os
+import platform
+import sys
+import timeit
 
 __copyright__ = "Copyright (c) 2017 . All Rights Reserved"
 __author__ = "Hai Liang Wang"
 __date__ = "2017-10-21:11:26:53"
 
 
-import os
-import sys
-import platform
-import multiprocessing
 curdir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(curdir)
 
-if sys.version_info[0] < 3:
+try:
     reload(sys)
     sys.setdefaultencoding("utf-8")
-    # raise "Must be using Python 3"
-
-import timeit
+except NameError:
+    pass
 
 print("\nEnumerating Available System Resources...")
 
